@@ -1,0 +1,21 @@
+{
+  "airport": "Chaudhary Charan Singh International Airport",
+  "iata": "LCK",
+  "closed_world": true,
+  "documents": [
+    {"id": "terminals", "title": "Terminals and airlines", "lang": "en", "source": "lck_airport/terminals.md"},
+    {"id": "gates", "title": "Gates and last-call", "lang": "en", "source": "lck_airport/gates.md"},
+    {"id": "security", "title": "Security screening", "lang": "en", "source": "lck_airport/security.md"},
+    {"id": "transport", "title": "Metro, taxi, car park, hotel shuttle", "lang": "en", "source": "lck_airport/transport.md"},
+    {"id": "amenities", "title": "Prayer room, medical, lost and found, wifi", "lang": "en", "source": "lck_airport/amenities.md"},
+    {"id": "hours", "title": "Opening hours and phones", "lang": "en", "source": "lck_airport/hours.md"},
+    {"id": "faq", "title": "Short spoken answers", "lang": "en", "source": "lck_airport/faq.md"},
+    {"id": "gates-hi", "title": "गेट और लास्ट कॉल", "lang": "hi", "source": "lck_airport/hi/gates.md", "same_as": "lck_airport/gates.md"},
+    {"id": "amenities-hi", "title": "प्रार्थना कक्ष, मेडिकल, खोया-पाया", "lang": "hi", "source": "lck_airport/hi/amenities.md", "same_as": "lck_airport/amenities.md"},
+    {"id": "faq-hi", "title": "छोटे बोले जाने वाले जवाब", "lang": "hi", "source": "lck_airport/hi/faq.md", "same_as": "lck_airport/faq.md"},
+    {"id": "gates-es", "title": "Puertas y último aviso", "lang": "es", "source": "lck_airport/es/gates.md", "same_as": "lck_airport/gates.md"},
+    {"id": "amenities-es", "title": "Sala de oración, médico, objetos perdidos", "lang": "es", "source": "lck_airport/es/amenities.md", "same_as": "lck_airport/amenities.md"},
+    {"id": "faq-es", "title": "Respuestas cortas para hablar", "lang": "es", "source": "lck_airport/es/faq.md", "same_as": "lck_airport/faq.md"}
+  ],
+  "do_not_ingest": ["unknown_traps.json", "README.md", "manifest.json"]
+}

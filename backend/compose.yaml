@@ -1,0 +1,37 @@
+services:
+  nginx:
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile
+    container_name: lck_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - lck_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: lck_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ../data:/app/data:ro
+      - lck_storage:/app/storage
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - lck_network
+
+volumes:
+  lck_storage:
+
+networks:
+  lck_network:
+    driver: bridge
+
