@@ -11,6 +11,23 @@ from lck_backend.storage.local import LocalStorageAdapter
 from lck_backend.retrieval.chunking import chunk_document
 
 
+def strip_frontmatter(text: str) -> str:
+    """
+    Removes a leading YAML frontmatter block so it never reaches the prompt or the chunker.
+    Returns the text unchanged when there is no frontmatter or the block is unterminated.
+    """
+    body = text.lstrip("\ufeff")
+    lines = body.split("\n")
+    if not lines or lines[0].strip() != "---":
+        return text
+
+    for idx in range(1, len(lines)):
+        if lines[idx].strip() == "---":
+            return "\n".join(lines[idx + 1:]).lstrip("\n")
+
+    return text
+
+
 class KnowledgeSnapshot:
     def __init__(
         self,
@@ -25,9 +42,19 @@ class KnowledgeSnapshot:
         self.manifest = manifest
         self.documents_content = documents_content
         self.chunks = chunks
+        self._full_context: Optional[str] = None
 
     def get_full_context(self) -> str:
-        """Assembles all approved documents into a unified markdown context for OKF."""
+        """
+        Assembles all approved documents into a unified markdown context for OKF.
+
+        The result is memoised per snapshot: it can only change when SnapshotManager
+        swaps in a new snapshot, so no TTL is needed. Keeping the string byte-identical
+        across requests is also what lets the model reuse its cached prompt prefix.
+        """
+        if settings.cache_knowledge_context and self._full_context is not None:
+            return self._full_context
+
         context_parts = []
         for doc_meta in self.manifest.documents:
             if doc_meta.enabled and doc_meta.id in self.documents_content:
@@ -35,7 +62,10 @@ class KnowledgeSnapshot:
                     f"--- DOCUMENT: {doc_meta.title} (ID: {doc_meta.id}, Lang: {doc_meta.lang}) ---\n"
                     f"{self.documents_content[doc_meta.id]}\n"
                 )
-        return "\n".join(context_parts)
+
+        context = "\n".join(context_parts)
+        self._full_context = context
+        return context
 
     def to_status_response(self, is_active: bool = True) -> SnapshotStatusResponse:
         total_chars = sum(len(c) for c in self.documents_content.values())
@@ -96,7 +126,7 @@ class SnapshotManager:
                 raise KnowledgeSnapshotError(f"Approved document not found on disk: {file_path}")
 
             try:
-                content = file_path.read_text(encoding="utf-8")
+                content = strip_frontmatter(file_path.read_text(encoding="utf-8"))
                 docs_content[doc.id] = content
                 doc.char_count = len(content)
 
@@ -112,8 +142,8 @@ class SnapshotManager:
             except Exception as e:
                 raise KnowledgeSnapshotError(f"Failed to read/process document {doc.id}: {e}")
 
-        version = f"v_{datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
-        created_at = datetime.datetime.utcnow().isoformat()
+        version = f"v_{datetime.datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
+        created_at = datetime.datetime.now(datetime.UTC).isoformat()
 
         snapshot = KnowledgeSnapshot(
             version=version,

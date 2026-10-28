@@ -265,6 +265,45 @@ airport_project/
 
 ---
 
+## 4.1 Request Flow: Python Execution Lifecycle
+
+When a passenger query enters the backend (`POST /api/v1/chat`), here is the exact sequence of Python calls:
+
+```
+[HTTP Request: JSON body]
+       │
+       ▼
+1. api/routes/chat.py :: chat(request: ChatRequest)
+   ├── Pydantic validates JSON schema into ChatRequest object
+   └── Calls: await chat_service.process_chat(request)
+       │
+       ▼
+2. services/chat_service.py :: process_chat()
+   ├── Step A: Safety Gatekeeper
+   │   └── Calls: await guardrail.classify(request.query)
+   │       └── guardrail/classifier.py (Keyword fast-pass OR TinyLlama LLM check)
+   │       └── If rejected: Returns polite redirection immediately (0 ms LLM cost)
+   │
+   ├── Step B: Multi-Turn Memory
+   │   └── Calls: await memory_store.get_or_create_session(session_id)
+   │   └── Calls: await memory_store.get_history(session_id)
+   │       └── memory/store.py (Async SQLite fetch of last 20 turns)
+   │
+   ├── Step C: Knowledge Strategy Execution
+   │   └── Calls: strategy = strategy_factory.get_strategy(request.strategy)
+   │   └── Calls: await strategy.answer(query, history, language)
+   │       ├── [OKF]: Injects complete 13-doc snapshot into system prompt
+   │       └── [RAG]: Retrieves top-K table-aware BM25 chunks via HybridRetriever
+   │   └── Calls: await llm_client.acomplete(messages) -> Ollama (qwen2.5:7b)
+   │
+   └── Step D: Persistence & Response
+       ├── Calls: await memory_store.add_message(user_query)
+       ├── Calls: await memory_store.add_message(assistant_response)
+       └── Returns: ChatResponse object (FastAPI serializes to JSON HTTP 200)
+```
+
+---
+
 ## 5. Environment Variables — Complete Schema
 
 ### Application & Server

@@ -52,6 +52,9 @@ class Settings(BaseSettings):
     llm_temperature: float = 0.1
     llm_max_tokens: int = 1024
     llm_timeout_seconds: float = 60.0
+    # Ollama defaults to a 2048-token context and silently truncates anything longer,
+    # which is far smaller than the full knowledge snapshot. Ignored by hosted providers.
+    llm_num_ctx: int = 16384
 
     # Provider endpoints & credentials (optional)
     ollama_api_base: str = "http://host.docker.internal:11434"

@@ -21,6 +21,15 @@ class LLMClient:
     def __init__(self, model: Optional[str] = None):
         self.model = model or settings.llm_model
 
+    def _provider_options(self) -> Dict[str, Any]:
+        """
+        Ollama truncates the prompt to num_ctx (2048 by default) without warning, which would
+        silently drop most of the knowledge snapshot. Hosted providers size their own context.
+        """
+        if self.model.startswith("ollama"):
+            return {"num_ctx": settings.llm_num_ctx}
+        return {}
+
     async def acomplete(
         self,
         messages: List[Dict[str, str]],
@@ -39,6 +48,7 @@ class LLMClient:
                 temperature=temp,
                 max_tokens=tokens,
                 timeout=tout,
+                **self._provider_options(),
             )
             return response.choices[0].message.content or ""
         except Exception as e:
@@ -64,6 +74,7 @@ class LLMClient:
                 max_tokens=tokens,
                 timeout=tout,
                 stream=True,
+                **self._provider_options(),
             )
             async for chunk in response:
                 delta = chunk.choices[0].delta.content

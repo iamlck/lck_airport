@@ -1,8 +1,4 @@
 import unittest
-import sys
-import os
-
-sys.path.insert(0, os.path.abspath("lck_airport/backend/src"))
 
 from lck_backend.retrieval.chunking import extract_markdown_tables, chunk_document
 
