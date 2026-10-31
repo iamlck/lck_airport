@@ -1,11 +1,11 @@
 import json
 from typing import AsyncGenerator
-from lck_backend.schemas.chat import ChatRequest, ChatResponse, StreamChunk
-from lck_backend.guardrail.classifier import guardrail
-from lck_backend.memory.store import memory_store
-from lck_backend.strategies.factory import strategy_factory
-from lck_backend.core.errors import GuardrailRejectedError
-from lck_backend.core.logging import logger
+from schemas.chat import ChatRequest, ChatResponse, StreamChunk
+from guardrail.classifier import guardrail
+from memory.store import memory_store
+from strategies.factory import strategy_factory
+from core.errors import GuardrailRejectedError
+from core.logging import logger
 
 
 class ChatService:

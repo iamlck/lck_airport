@@ -17,8 +17,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 os.environ.setdefault("DATA_DIR", str(Path(__file__).parent.parent.parent / "data"))
 os.environ.setdefault("MANIFEST_PATH", str(Path(__file__).parent.parent.parent / "data" / "manifest.json"))
 
-from lck_backend.knowledge.snapshot import SnapshotManager, strip_frontmatter  # noqa: E402
-from lck_backend.strategies.okf import OKF_KNOWLEDGE_TEMPLATE, OKF_LANGUAGE_TEMPLATE  # noqa: E402
+from knowledge.snapshot import SnapshotManager, strip_frontmatter  # noqa: E402
+from strategies.okf import OKF_KNOWLEDGE_TEMPLATE, OKF_LANGUAGE_TEMPLATE  # noqa: E402
 
 
 def approx_tokens(text: str) -> int:

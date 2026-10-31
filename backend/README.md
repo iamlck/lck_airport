@@ -33,48 +33,47 @@ backend/
 │       ├── Dockerfile          # Docker recipe for Nginx
 │       ├── nginx.conf          # Core Nginx performance settings
 │       └── conf.d/default.conf # Reverse proxy rules (rates, SSL, SSE buffering)
-└── src/
-    └── lck_backend/            # Main Python package directory
-        ├── main.py             # App entry point, lifespan, middleware
-        ├── core/
-        │   ├── config.py       # Pydantic BaseSettings loading .env
-        │   ├── errors.py       # Custom exception definitions
-        │   └── logging.py      # Structured application logging
-        ├── schemas/            # Pydantic data schemas (Request & Response models)
-        │   ├── chat.py         # ChatRequest, ChatResponse, Citation, StreamChunk
-        │   ├── health.py       # Health check response models
-        │   ├── knowledge.py    # Manifest and Snapshot status schemas
-        │   └── audio.py        # STT/TTS synthesis schemas
-        ├── api/                # API route definitions
-        │   ├── router.py       # Aggregator combining all sub-routers
-        │   ├── dependencies.py # Authentication & security guards
-        │   └── routes/
-        │       ├── chat.py     # POST /api/v1/chat (Core chat & streaming)
-        │       ├── health.py   # GET /api/v1/health (Ollama & DB health)
-        │       ├── knowledge.py# GET /status & POST /refresh
-        │       └── audio.py    # POST /transcribe & POST /synthesize
-        ├── services/
-        │   └── chat_service.py # Core orchestrator connecting guardrails, memory, strategies
-        ├── guardrail/
-        │   └── classifier.py   # Two-stage gatekeeper (fast keyword pass + LLM filter)
-        ├── memory/             # Multi-turn conversation persistence
-        │   ├── models.py       # SQLAlchemy ORM models (SessionModel, MessageModel)
-        │   └── store.py        # Async database queries, sliding window, summarization
-        ├── knowledge/
-        │   └── snapshot.py     # Reads manifest.json, builds atomic in-memory knowledge
-        ├── retrieval/          # RAG search components
-        │   ├── chunking.py     # Table-aware markdown parser and chunker
-        │   ├── lexical.py      # BM25 keyword search index
-        │   └── hybrid.py       # Reciprocal Rank Fusion (RRF) with table boost
-        ├── strategies/         # Pluggable knowledge strategies
-        │   ├── base.py         # Abstract Base Class (interface)
-        │   ├── factory.py      # Singleton returning requested strategy
-        │   ├── okf.py          # Open-Knowledge Full context strategy
-        │   └── rag.py          # Retrieval-Augmented Generation strategy
-        ├── llm/
-        │   └── client.py       # LiteLLM async wrapper for chat and streaming
-        └── storage/
-            └── local.py        # Local disk filesystem adapter
+└── src/                        # Main Python source directory
+    ├── main.py                 # App entry point, lifespan, middleware
+    ├── core/
+    │   ├── config.py           # Pydantic BaseSettings loading .env
+    │   ├── errors.py           # Custom exception definitions
+    │   └── logging.py          # Structured application logging
+    ├── schemas/                # Pydantic data schemas (Request & Response models)
+    │   ├── chat.py             # ChatRequest, ChatResponse, Citation, StreamChunk
+    │   ├── health.py           # Health check response models
+    │   ├── knowledge.py        # Manifest and Snapshot status schemas
+    │   └── audio.py            # STT/TTS synthesis schemas
+    ├── api/                    # API route definitions
+    │   ├── router.py           # Aggregator combining all sub-routers
+    │   ├── dependencies.py     # Authentication & security guards
+    │   └── routes/
+    │       ├── chat.py         # POST /chat, /chat/okf, /chat/rag
+    │       ├── health.py       # GET /api/v1/health (Ollama & DB health)
+    │       ├── knowledge.py    # GET /status & POST /refresh
+    │       └── audio.py        # POST /transcribe & POST /synthesize
+    ├── services/
+    │   └── chat_service.py     # Core orchestrator connecting guardrails, memory, strategies
+    ├── guardrail/
+    │   └── classifier.py       # Two-stage gatekeeper (fast keyword pass + LLM filter)
+    ├── memory/                 # Multi-turn conversation persistence
+    │   ├── models.py           # SQLAlchemy ORM models (SessionModel, MessageModel)
+    │   └── store.py            # Async database queries, sliding window, summarization
+    ├── knowledge/
+    │   └── snapshot.py         # Reads manifest.json, builds atomic in-memory knowledge
+    ├── retrieval/              # RAG search components
+    │   ├── chunking.py         # Table-aware markdown parser and chunker
+    │   ├── lexical.py          # BM25 keyword search index
+    │   └── hybrid.py           # Reciprocal Rank Fusion (RRF) with table boost
+    ├── strategies/             # Pluggable knowledge strategies
+    │   ├── base.py             # Abstract Base Class (interface)
+    │   ├── factory.py          # Singleton returning requested strategy
+    │   ├── okf.py              # Open-Knowledge Full context strategy
+    │   └── rag.py              # Retrieval-Augmented Generation strategy
+    ├── llm/
+    │   └── client.py           # LiteLLM async wrapper for chat and streaming
+    └── storage/
+        └── local.py            # Local disk filesystem adapter
 ```
 
 ---
@@ -155,7 +154,7 @@ Let us follow a single request:
 ---
 
 #### 📍 Stop 1: FastAPI Route & Pydantic Validation
-**File:** [`src/lck_backend/api/routes/chat.py`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/backend/src/lck_backend/api/routes/chat.py)
+**File:** [`src/api/routes/chat.py`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/backend/src/api/routes/chat.py)
 
 ```python
 @router.post("", response_model=ChatResponse)
@@ -173,7 +172,7 @@ async def chat(request: ChatRequest):
 ---
 
 #### 📍 Stop 2: The Orchestrator (Chat Service)
-**File:** [`src/lck_backend/services/chat_service.py`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/backend/src/lck_backend/services/chat_service.py)
+**File:** [`src/services/chat_service.py`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/backend/src/services/chat_service.py)
 
 ```python
 class ChatService:
@@ -190,7 +189,7 @@ class ChatService:
 ---
 
 #### 📍 Stop 3: Safety & Domain Gatekeeper
-**File:** [`src/lck_backend/guardrail/classifier.py`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/backend/src/lck_backend/guardrail/classifier.py)
+**File:** [`src/guardrail/classifier.py`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/backend/src/guardrail/classifier.py)
 
 ```python
 async def classify(self, user_query: str) -> Dict[str, Any]:
@@ -214,7 +213,7 @@ async def classify(self, user_query: str) -> Dict[str, Any]:
 ---
 
 #### 📍 Stop 4: Conversation Memory & SQLite Store
-**File:** [`src/lck_backend/memory/store.py`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/backend/src/lck_backend/memory/store.py)
+**File:** [`src/memory/store.py`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/backend/src/memory/store.py)
 
 ```python
 sid = await memory_store.get_or_create_session(req.session_id, req.user_id)
@@ -235,7 +234,7 @@ history = await memory_store.get_history(sid)
 ---
 
 #### 📍 Stop 5: Knowledge Strategy & LLM Reasoning
-**File:** [`src/lck_backend/strategies/okf.py`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/backend/src/lck_backend/strategies/okf.py) OR [`rag.py`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/backend/src/lck_backend/strategies/rag.py)
+**File:** [`src/strategies/okf.py`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/backend/src/strategies/okf.py) OR [`rag.py`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/backend/src/strategies/rag.py)
 
 ```python
 # Strategy Factory selects OKF or RAG based on req.strategy
@@ -259,7 +258,7 @@ resp = await strategy.answer(
 ---
 
 #### 📍 Stop 6: Database Persistence & HTTP JSON Response
-**File:** [`src/lck_backend/services/chat_service.py`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/backend/src/lck_backend/services/chat_service.py)
+**File:** [`src/services/chat_service.py`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/backend/src/services/chat_service.py)
 
 ```python
 # Save current turn to database
@@ -342,7 +341,7 @@ docker-compose up -d --build
    ```
 4. Start the Uvicorn server:
    ```bash
-   uvicorn lck_backend.main:app --host 0.0.0.0 --port 8000 --reload
+   uvicorn main:app --app-dir src --host 0.0.0.0 --port 8000 --reload
    ```
 5. View interactive API documentation:
    Open **http://localhost:8000/docs** in your browser to test endpoints interactively!

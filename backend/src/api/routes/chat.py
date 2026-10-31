@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
-from lck_backend.schemas.chat import ChatRequest, ChatResponse
-from lck_backend.services.chat_service import chat_service
+from schemas.chat import ChatRequest, ChatResponse
+from services.chat_service import chat_service
 
 router = APIRouter(tags=["Chat"])
 

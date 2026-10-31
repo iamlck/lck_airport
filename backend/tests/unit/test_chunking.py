@@ -1,6 +1,6 @@
 import unittest
 
-from lck_backend.retrieval.chunking import extract_markdown_tables, chunk_document
+from retrieval.chunking import extract_markdown_tables, chunk_document
 
 
 class TestChunking(unittest.TestCase):

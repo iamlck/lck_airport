@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from lck_backend.llm.client import LLMClient
+from llm.client import LLMClient
 
 
 class TestProviderOptions(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestProviderOptions(unittest.TestCase):
     """
 
     def test_num_ctx_sent_for_ollama(self):
-        with patch("lck_backend.llm.client.settings.llm_num_ctx", 16384):
+        with patch("llm.client.settings.llm_num_ctx", 16384):
             self.assertEqual(LLMClient("ollama/qwen2.5:7b")._provider_options(), {"num_ctx": 16384})
 
     def test_num_ctx_covers_ollama_chat_prefix(self):
@@ -23,7 +23,7 @@ class TestProviderOptions(unittest.TestCase):
 
     def test_num_ctx_exceeds_full_snapshot(self):
         """The snapshot measures ~7.6k prompt tokens; the default must leave room for it."""
-        with patch("lck_backend.llm.client.settings.llm_num_ctx", 16384):
+        with patch("llm.client.settings.llm_num_ctx", 16384):
             self.assertGreater(LLMClient("ollama/qwen2.5:7b")._provider_options()["num_ctx"], 8000)
 
 

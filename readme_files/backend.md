@@ -159,9 +159,8 @@ airport_project/
     │           └── default.conf          # Reverse proxy, SSE streaming, rate limits, headers
     │
     ├── src/
-    │   └── lck_backend/
-    │       ├── __init__.py
-    │       ├── main.py                   # FastAPI app factory & lifespan
+    │   ├── __init__.py
+    │   ├── main.py                   # FastAPI app factory & lifespan
     │       │
     │       ├── api/                      # Route handlers
     │       │   ├── __init__.py

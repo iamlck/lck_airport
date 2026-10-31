@@ -1,7 +1,7 @@
 from typing import Dict, Any
-from lck_backend.core.config import settings
-from lck_backend.llm.client import LLMClient
-from lck_backend.core.logging import logger
+from core.config import settings
+from llm.client import LLMClient
+from core.logging import logger
 
 GUARDRAIL_SYSTEM_PROMPT = """You are a real-time security and relevance gatekeeper for the AI Assistant of Chaudhary Charan Singh International Airport (LCK) in Lucknow, India.
 

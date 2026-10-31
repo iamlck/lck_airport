@@ -1,6 +1,6 @@
-from lck_backend.strategies.base import KnowledgeStrategy
-from lck_backend.strategies.okf import OKFStrategy
-from lck_backend.strategies.rag import RAGStrategy
+from strategies.base import KnowledgeStrategy
+from strategies.okf import OKFStrategy
+from strategies.rag import RAGStrategy
 
 
 class StrategyFactory:
