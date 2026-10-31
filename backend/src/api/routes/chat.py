@@ -15,3 +15,25 @@ async def chat_endpoint(request: ChatRequest):
         )
     return await chat_service.process_chat(request)
 
+
+@router.post("/chat/okf", response_model=ChatResponse)
+async def chat_okf_endpoint(request: ChatRequest):
+    request.strategy = "okf"
+    if request.stream:
+        return StreamingResponse(
+            chat_service.stream_chat(request),
+            media_type="text/event-stream"
+        )
+    return await chat_service.process_chat(request)
+
+
+@router.post("/chat/rag", response_model=ChatResponse)
+async def chat_rag_endpoint(request: ChatRequest):
+    request.strategy = "rag"
+    if request.stream:
+        return StreamingResponse(
+            chat_service.stream_chat(request),
+            media_type="text/event-stream"
+        )
+    return await chat_service.process_chat(request)
+

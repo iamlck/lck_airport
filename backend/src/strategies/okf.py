@@ -5,6 +5,7 @@ from schemas.chat import ChatResponse, Citation, StreamChunk
 from knowledge.snapshot import snapshot_manager
 from llm.client import LLMClient
 from core.logging import logger
+from core.config import settings
 
 # Everything in this template is byte-identical on every request, in every language.
 # It is sent as its own system message so it forms a stable prompt prefix that the model
@@ -55,8 +56,13 @@ class OKFStrategy(KnowledgeStrategy):
         if not snapshot:
             snapshot = snapshot_manager.refresh()
 
+        if settings.okf_language_aware_context and hasattr(snapshot, "get_context_for_language"):
+            context = snapshot.get_context_for_language(language)
+        else:
+            context = snapshot.get_full_context()
+
         messages = [
-            {"role": "system", "content": OKF_KNOWLEDGE_TEMPLATE.format(context=snapshot.get_full_context())},
+            {"role": "system", "content": OKF_KNOWLEDGE_TEMPLATE.format(context=context)},
             {"role": "system", "content": OKF_LANGUAGE_TEMPLATE.format(
                 language_instruction=self._get_language_instruction(language)
             )},

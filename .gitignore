@@ -103,6 +103,7 @@ coverage.xml
 htmlcov/
 .mypy_cache/
 .ruff_cache/
+data/evaluation/eval_report_*.json
 
 # ------------------------------------------------------------------------------
 # Node.js & Frontend Dependencies

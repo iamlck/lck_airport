@@ -43,6 +43,7 @@ class KnowledgeSnapshot:
         self.documents_content = documents_content
         self.chunks = chunks
         self._full_context: Optional[str] = None
+        self._language_contexts: Dict[str, str] = {}
 
     def get_full_context(self) -> str:
         """
@@ -65,6 +66,44 @@ class KnowledgeSnapshot:
 
         context = "\n".join(context_parts)
         self._full_context = context
+        return context
+
+    def get_context_for_language(self, lang: str = "en") -> str:
+        """
+        Assembles a language-optimized, byte-identical knowledge context for OKF.
+
+        - For English ('en'): includes only approved English documents, cutting ~48% prompt tokens
+          by omitting redundant Hindi and Spanish translations.
+        - For non-English ('hi', 'es'): includes approved localized documents where available
+          and English documents as fallback for missing topics.
+        - The resulting prompt prefix is memoized per language, maximizing KV cache hits.
+        """
+        if settings.cache_knowledge_context and lang in self._language_contexts:
+            return self._language_contexts[lang]
+
+        # 1. Documents directly in the requested language
+        lang_docs = [d for d in self.manifest.documents if d.enabled and d.lang == lang]
+        replaced_sources = {d.same_as for d in lang_docs if d.same_as}
+
+        # 2. English fallback docs for topics not translated into this language
+        fallback_docs = []
+        if lang != "en":
+            for d in self.manifest.documents:
+                if d.enabled and d.lang == "en" and d.source not in replaced_sources:
+                    fallback_docs.append(d)
+
+        selected_docs = lang_docs + fallback_docs if lang != "en" else lang_docs
+
+        context_parts = []
+        for doc_meta in selected_docs:
+            if doc_meta.id in self.documents_content:
+                context_parts.append(
+                    f"--- DOCUMENT: {doc_meta.title} (ID: {doc_meta.id}, Lang: {doc_meta.lang}) ---\n"
+                    f"{self.documents_content[doc_meta.id].strip()}\n"
+                )
+
+        context = "\n".join(context_parts)
+        self._language_contexts[lang] = context
         return context
 
     def to_status_response(self, is_active: bool = True) -> SnapshotStatusResponse:

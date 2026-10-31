@@ -98,6 +98,7 @@ class Settings(BaseSettings):
     cache_ttl_seconds: int = 3600
     cache_provider_native: bool = True
     enable_streaming: bool = True
+    okf_language_aware_context: bool = True
 
     # 9. Security settings
     auth_enabled: bool = True

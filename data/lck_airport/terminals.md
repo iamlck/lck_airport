@@ -7,7 +7,7 @@ source: nia_airport/terminals.md
 
 # Noor International Airport — terminals
 
-Noor International Airport (IATA: **NIA**) has three passenger terminals connected airside by the Skywalk moving walkway. Allow **8 minutes** to walk T1↔T2 and **10 minutes** to walk T2↔T3. The Skywalk is open 24 hours.
+Noor International Airport (IATA: **NIA**) has three passenger terminals connected airside by the Skywalk moving walkway. Allow **8 minutes** to walk between Terminal 1 and Terminal 2 (T1↔T2) and **10 minutes** to walk between Terminal 2 and Terminal 3 (T2↔T3). The Skywalk moving walkway is open 24 hours.
 
 ## Terminal 1 — Domestic and regional
 

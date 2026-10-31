@@ -17,5 +17,5 @@
     {"id": "amenities-es", "title": "Sala de oración, médico, objetos perdidos", "lang": "es", "source": "lck_airport/es/amenities.md", "same_as": "lck_airport/amenities.md"},
     {"id": "faq-es", "title": "Respuestas cortas para hablar", "lang": "es", "source": "lck_airport/es/faq.md", "same_as": "lck_airport/faq.md"}
   ],
-  "do_not_ingest": ["unknown_traps.json", "README.md", "manifest.json"]
+  "do_not_ingest": ["unknown_traps.json", "README.md", "manifest.json", "golden_dataset.json"]
 }

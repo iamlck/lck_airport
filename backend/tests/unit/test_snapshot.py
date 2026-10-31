@@ -94,6 +94,14 @@ class TestSnapshot(unittest.TestCase):
         snapshot = self.manager.create_snapshot()
         self.assertIs(snapshot.get_full_context(), snapshot.get_full_context())
 
+    def test_language_context_is_memoised_and_filtered(self):
+        snapshot = self.manager.create_snapshot()
+        en_ctx = snapshot.get_context_for_language("en")
+        self.assertIs(en_ctx, snapshot.get_context_for_language("en"))
+        # English context should not contain Hindi or Spanish documents
+        self.assertNotIn("Lang: hi", en_ctx)
+        self.assertNotIn("Lang: es", en_ctx)
+
     def test_refresh_builds_a_new_context(self):
         first = self.manager.refresh()
         second = self.manager.refresh()

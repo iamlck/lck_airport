@@ -11,6 +11,9 @@ class _FakeSnapshot:
     def get_full_context(self):
         return self._context
 
+    def get_context_for_language(self, lang="en"):
+        return self._context
+
 
 class TestOKFPromptPrefix(unittest.TestCase):
     """
