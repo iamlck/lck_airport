@@ -2,8 +2,8 @@ import os
 import asyncio
 from typing import List, Dict, Any, AsyncGenerator, Optional
 import litellm
-from lck_backend.core.config import settings
-from lck_backend.core.logging import logger
+from core.config import settings
+from core.logging import logger
 
 if settings.ollama_api_base:
     os.environ["OLLAMA_API_BASE"] = settings.ollama_api_base

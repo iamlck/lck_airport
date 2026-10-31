@@ -1,6 +1,6 @@
 import secrets
 from fastapi import Header, HTTPException, status
-from lck_backend.core.config import settings
+from core.config import settings
 
 
 async def verify_admin_token(authorization: str = Header(None)) -> bool:

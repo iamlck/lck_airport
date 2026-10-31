@@ -1,6 +1,6 @@
 import logging
 import sys
-from lck_backend.core.config import settings
+from core.config import settings
 
 
 def setup_logging() -> logging.Logger:

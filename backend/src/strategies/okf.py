@@ -1,10 +1,10 @@
 import time
 from typing import List, Dict, Any, AsyncGenerator
-from lck_backend.strategies.base import KnowledgeStrategy
-from lck_backend.schemas.chat import ChatResponse, Citation, StreamChunk
-from lck_backend.knowledge.snapshot import snapshot_manager
-from lck_backend.llm.client import LLMClient
-from lck_backend.core.logging import logger
+from strategies.base import KnowledgeStrategy
+from schemas.chat import ChatResponse, Citation, StreamChunk
+from knowledge.snapshot import snapshot_manager
+from llm.client import LLMClient
+from core.logging import logger
 
 # Everything in this template is byte-identical on every request, in every language.
 # It is sent as its own system message so it forms a stable prompt prefix that the model

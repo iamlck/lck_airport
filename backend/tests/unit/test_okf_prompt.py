@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from lck_backend.strategies.okf import OKFStrategy, OKF_KNOWLEDGE_TEMPLATE
+from strategies.okf import OKFStrategy, OKF_KNOWLEDGE_TEMPLATE
 
 
 class _FakeSnapshot:
@@ -19,12 +19,12 @@ class TestOKFPromptPrefix(unittest.TestCase):
     """
 
     def setUp(self):
-        patcher = patch("lck_backend.strategies.okf.snapshot_manager")
+        patcher = patch("strategies.okf.snapshot_manager")
         self.manager = patcher.start()
         self.manager.active_snapshot = _FakeSnapshot()
         self.addCleanup(patcher.stop)
 
-        with patch("lck_backend.strategies.okf.LLMClient"):
+        with patch("strategies.okf.LLMClient"):
             self.strategy = OKFStrategy()
 
     def test_knowledge_block_is_first_and_static(self):

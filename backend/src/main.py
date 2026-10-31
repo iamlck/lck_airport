@@ -1,11 +1,11 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from lck_backend.core.config import settings
-from lck_backend.core.logging import logger
-from lck_backend.api.router import api_router
-from lck_backend.knowledge.snapshot import snapshot_manager
-from lck_backend.memory.store import memory_store
+from core.config import settings
+from core.logging import logger
+from api.router import api_router
+from knowledge.snapshot import snapshot_manager
+from memory.store import memory_store
 
 
 @asynccontextmanager

@@ -1,13 +1,13 @@
 import time
 from typing import List, Dict, Any, AsyncGenerator
-from lck_backend.strategies.base import KnowledgeStrategy
-from lck_backend.schemas.chat import ChatResponse, Citation, StreamChunk
-from lck_backend.knowledge.snapshot import snapshot_manager
-from lck_backend.retrieval.lexical import LexicalIndex
-from lck_backend.retrieval.hybrid import HybridRetriever
-from lck_backend.llm.client import LLMClient
-from lck_backend.core.config import settings
-from lck_backend.core.logging import logger
+from strategies.base import KnowledgeStrategy
+from schemas.chat import ChatResponse, Citation, StreamChunk
+from knowledge.snapshot import snapshot_manager
+from retrieval.lexical import LexicalIndex
+from retrieval.hybrid import HybridRetriever
+from llm.client import LLMClient
+from core.config import settings
+from core.logging import logger
 
 RAG_SYSTEM_TEMPLATE = """You are the official AI Talking Avatar Assistant for Chaudhary Charan Singh International Airport (LCK) in Lucknow, India.
 

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, AsyncGenerator
-from lck_backend.schemas.chat import ChatResponse, Citation, StreamChunk
+from schemas.chat import ChatResponse, Citation, StreamChunk
 
 
 class KnowledgeStrategy(ABC):

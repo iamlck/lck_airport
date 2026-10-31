@@ -4,12 +4,13 @@ Official AI Talking Avatar and Passenger Kiosk Assistant for **Chaudhary Charan 
 
 ---
 
-## 📖 Welcome, Developers!
+## 📖 Documentation Directory
 
-If you are new to **Python** or **React**, this repository is organized cleanly with dedicated beginner guides for each subsystem:
+This repository contains beginner-friendly, detailed guides for each subsystem:
 
 * 🐍 **Backend Developer Guide (FastAPI, Python 3.12, LiteLLM)**: [`backend/README.md`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/backend/README.md)
 * ⚛️ **Frontend Developer Guide (React, Vite, Three.js 3D Avatar)**: [`frontend/README.md`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/frontend/README.md)
+* 📂 **Knowledge Base & Corpus Guide**: [`data/README.md`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/data/README.md)
 * 📋 **Architectural Blueprints & Specs**: [`readme_files/`](file:///Users/chandrakumar/Documents/airport_project/lck_airport/readme_files/)
 
 ---
@@ -27,16 +28,23 @@ flowchart TD
         TTSHook --> Avatar3D["AvatarCanvas.tsx & AvatarModel.tsx\n(3D Ready Player Me / Avaturn Mesh)\n60 FPS Viseme & Blendshape Driver"]
     end
 
-    ReactApp -->|Proxy /api| Nginx["🛡️ Nginx Reverse Proxy\n(Port 80)"]
+    ReactApp -->|Proxy /api| Nginx["🛡️ Nginx Reverse Proxy\n(Port 80)\nPath Routing & Latency Tracking"]
 
     subgraph BackendApp ["Backend Service (FastAPI :8000)"]
-        Nginx --> FastAPI["main.py (FastAPI Server)"]
-        FastAPI --> Guardrail["guardrail/classifier.py\n(Injection & Safety Gatekeeper)"]
-        Guardrail --> Memory["memory/store.py\n(SQLite / Postgres Multi-Turn DB)"]
+        Nginx -->|/api/v1/chat/okf| RouteOKF["POST /chat/okf\n(Logs to okf_access.log)"]
+        Nginx -->|/api/v1/chat/rag| RouteRAG["POST /chat/rag\n(Logs to rag_access.log)"]
+        Nginx -->|/api/v1/chat| RouteGeneral["POST /chat"]
+
+        RouteOKF --> Svc["services/chat_service.py"]
+        RouteRAG --> Svc
+        RouteGeneral --> Svc
+
+        Svc --> Guardrail["guardrail/classifier.py\n(Fast Keyword Pass + TinyLlama Gatekeeper)"]
+        Guardrail --> Memory["memory/store.py\n(SQLite on Persistent lck_storage Volume)"]
         Memory --> StrategyChooser{"Strategy Selector"}
         
         StrategyChooser -->|OKF| OKFStrat["strategies/okf.py\n(Full Context Knowledge Snapshot)"]
-        StrategyChooser -->|RAG| RAGStrat["strategies/rag.py\n(Hybrid BM25 + Table Boost Retrieval)"]
+        StrategyChooser -->|RAG| RAGStrat["strategies/rag.py\n(Table-Aware Hybrid BM25 Retrieval)"]
         
         OKFStrat --> LiteLLM["llm/client.py (LiteLLM)"]
         RAGStrat --> LiteLLM
@@ -44,8 +52,8 @@ flowchart TD
     end
 
     LocalOllama --> LiteLLM
-    LiteLLM --> FastAPI
-    FastAPI --> Nginx
+    LiteLLM --> Svc
+    Svc --> Nginx
     Nginx --> ReactApp
     ReactApp -->|Spoken Response + Real-time Lip-Sync| Passenger
 ```
@@ -62,21 +70,29 @@ lck_airport/
 ├── backend/                # FastAPI Python Backend
 │   ├── README.md           # 📖 Step-by-step Python & FastAPI beginner guide
 │   ├── compose.yaml        # Docker Compose configuration (FastAPI + Nginx)
-│   ├── pyproject.toml      # Python dependencies
+│   ├── pyproject.toml      # Python dependencies & packaging
 │   ├── .env.example        # Environment variable template
+│   ├── .env                # Runtime configuration (git-ignored)
 │   ├── docker/             # Dockerfiles for backend and Nginx reverse proxy
-│   └── src/lck_backend/    # Python application source code
-│       ├── main.py         # Entry point and lifespan
-│       ├── api/            # REST API endpoints (/chat, /health, /knowledge)
-│       ├── core/           # Configuration, logging, and error classes
-│       ├── guardrail/      # Safety and prompt injection filter
-│       ├── knowledge/      # Knowledge snapshot manager
-│       ├── llm/            # LiteLLM client wrapper
-│       ├── memory/         # Session memory and SQLite/PostgreSQL store
-│       ├── retrieval/      # Table-aware chunking and BM25 index
-│       ├── schemas/        # Pydantic data schemas
-│       ├── services/       # Chat orchestration service
-│       └── strategies/     # OKF and RAG strategy implementations
+│   │   ├── Dockerfile      # Python 3.12-slim backend container
+│   │   └── nginx/          # Nginx alpine reverse proxy with custom latency logging
+│   └── src/                # Python application source code
+│       ├── main.py         # Entry point, lifespan, CORS, router mounting
+│       ├── api/            # REST API endpoints
+│       │   └── routes/
+│       │       ├── chat.py      # POST /chat, /chat/okf, /chat/rag
+│       │       ├── health.py    # GET /health
+│       │       ├── knowledge.py # GET /status, POST /refresh
+│       │       └── audio.py     # POST /transcribe, /synthesize
+│       ├── core/           # Configuration, structured logging, errors
+│       ├── guardrail/      # Safety & prompt injection filter
+│       ├── knowledge/      # In-memory snapshot manager
+│       ├── llm/            # LiteLLM client wrapper for Ollama
+│       ├── memory/         # Session store & SQLite persistence
+│       ├── retrieval/      # Table-aware chunking & BM25 index
+│       ├── schemas/        # Pydantic data models
+│       ├── services/       # ChatService workflow orchestrator
+│       └── strategies/     # OKF & RAG strategy implementations
 │
 ├── frontend/               # React + Vite + TypeScript Web Client
 │   ├── README.md           # 📖 Step-by-step React & 3D Three.js beginner guide
@@ -91,10 +107,18 @@ lck_airport/
 │   └── src/
 │       ├── App.tsx         # Main interactive kiosk application
 │       ├── store.ts        # Global Zustand state store
-│       ├── components/     # React UI components (AvatarCanvas, VoiceChatControls)
-│       └── hooks/          # Custom hooks (useTTSPlayer, useVisemeSync)
+│       ├── components/     # React UI components
+│       │   ├── TranscriptList.tsx      # Conversation bubble list with verified citations
+│       │   ├── avatar/AvatarCanvas.tsx # 3D Canvas, lighting, status badges, model toggle
+│       │   ├── avatar/AvatarModel.tsx  # GLB loader, viseme blendshapes, blinking, head sway
+│       │   ├── avatar/visemeMap.ts     # 15 Oculus visemes & phoneme mapping
+│       │   └── voice/VoiceChatControls.tsx # Microphone button, quick chips, text input
+│       └── hooks/
+│           ├── useTTSPlayer.ts   # Web Speech API player with language matching
+│           └── useVisemeSync.ts  # Frame-by-frame viseme interpolation
 │
 ├── data/                   # Verified LCK Airport Knowledge Base
+│   ├── README.md           # Corpus documentation & inventory guide
 │   ├── manifest.json       # Declarative document inventory and checksum rules
 │   ├── unknown_traps.json  # Benchmark questions to test closed-world abstention
 │   └── lck_airport/        # Official airport documentation
@@ -120,9 +144,10 @@ lck_airport/
 
 ### 1. Prerequisites
 * **Docker & Docker Compose** installed.
-* **Ollama** running locally on host (`http://127.0.0.1:11434`) with `qwen2.5:7b` installed:
+* **Ollama** running locally on host (`http://127.0.0.1:11434`) with `qwen2.5:7b` and `tinyllama` installed:
   ```bash
-  ollama run qwen2.5:7b
+  ollama pull qwen2.5:7b
+  ollama pull tinyllama
   ```
 * **Node.js 18+** and **npm** installed.
 
@@ -134,11 +159,25 @@ From the project root:
 cd backend
 docker-compose up -d --build
 ```
-* Verify health:
-  ```bash
-  curl http://localhost/api/v1/health
-  ```
-* Expected response: `{"status": "healthy", "services": {"ollama": {"status": "connected"}, ...}}`
+
+#### Available Endpoints:
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/v1/health` | `GET` | Health check verifying Ollama and SQLite connectivity |
+| `/api/v1/chat` | `POST` | General chat endpoint (accepts `strategy: "okf"` or `"rag"`) |
+| `/api/v1/chat/okf` | `POST` | Dedicated OKF route (logged to `/var/log/nginx/okf_access.log`) |
+| `/api/v1/chat/rag` | `POST` | Dedicated RAG route (logged to `/var/log/nginx/rag_access.log`) |
+| `/api/v1/knowledge/status` | `GET` | Active knowledge snapshot metadata and document count |
+| `/api/v1/knowledge/refresh` | `POST` | Atomic knowledge refresh (requires Bearer token) |
+
+#### Inspecting Nginx Latency Logs:
+```bash
+# Monitor OKF edge latency
+docker exec lck_nginx tail -f /var/log/nginx/okf_access.log
+
+# Monitor RAG edge latency
+docker exec lck_nginx tail -f /var/log/nginx/rag_access.log
+```
 
 ---
 
@@ -149,6 +188,8 @@ cd frontend
 npm install
 npm run dev
 ```
+
 * Open your browser at **[http://localhost:3000](http://localhost:3000)**.
-* Click **"Test Voice"** on the avatar card to watch the 3D avatar speak and lip-sync.
-* Speak or type your flight and terminal questions in English, Hindi, or Spanish!
+* Click **"Test Voice"** on the avatar card to test lip-sync and audio speech.
+* Switch between **Officer 1** and **Officer 2** using the toggle button in the 3D canvas.
+* Switch strategies between **OKF** and **RAG** using the top navigation bar.

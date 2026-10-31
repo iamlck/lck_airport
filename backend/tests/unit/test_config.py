@@ -1,5 +1,5 @@
 import pytest
-from lck_backend.core.config import Settings, AppEnvironment
+from core.config import Settings, AppEnvironment
 
 
 def test_settings_default_values():

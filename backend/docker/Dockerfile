@@ -16,5 +16,6 @@ RUN pip install --no-cache-dir --upgrade pip && \
 EXPOSE 8000
 
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app/src
 
-CMD ["uvicorn", "lck_backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--app-dir", "src", "--host", "0.0.0.0", "--port", "8000"]

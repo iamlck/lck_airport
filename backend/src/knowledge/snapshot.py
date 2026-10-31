@@ -3,12 +3,12 @@ import uuid
 import datetime
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-from lck_backend.core.config import settings
-from lck_backend.core.logging import logger
-from lck_backend.core.errors import ManifestValidationError, KnowledgeSnapshotError
-from lck_backend.schemas.knowledge import ManifestSchema, DocumentMetadata, SnapshotStatusResponse
-from lck_backend.storage.local import LocalStorageAdapter
-from lck_backend.retrieval.chunking import chunk_document
+from core.config import settings
+from core.logging import logger
+from core.errors import ManifestValidationError, KnowledgeSnapshotError
+from schemas.knowledge import ManifestSchema, DocumentMetadata, SnapshotStatusResponse
+from storage.local import LocalStorageAdapter
+from retrieval.chunking import chunk_document
 
 
 def strip_frontmatter(text: str) -> str:

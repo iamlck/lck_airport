@@ -1,5 +1,5 @@
 import pytest
-from lck_backend.guardrail.classifier import GuardrailClassifier
+from guardrail.classifier import GuardrailClassifier
 
 
 @pytest.mark.asyncio

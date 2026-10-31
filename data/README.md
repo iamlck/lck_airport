@@ -1,25 +1,44 @@
-# NIA knowledge corpus — what you retrieve from
+# 📂 LCK Airport Knowledge Base — Source of Truth
 
-This folder is the **only** factual source your avatar may use. The airport is fictional. If a traveler asks something that is not in these files, your avatar says it does not know.
+This directory houses the **approved, authoritative knowledge corpus** for the **Chaudhary Charan Singh International Airport (LCK / VILK)** AI Assistant in Lucknow, India.
 
-## What you do with these files
+Under the closed-world knowledge policy, the AI Assistant is strictly restricted to facts contained within this corpus. If a passenger inquires about an unverified detail, unknown flight number, or missing amenity, the assistant must politely abstain and redirect the traveler.
 
-1. Read them. Gate C22, the prayer room, and lost-and-found are the demo facts.
-2. Write an ingest script that indexes **only** the paths in [`manifest.json`](./manifest.json) into ChromaDB.
-3. Do **not** ingest [`unknown_traps.json`](./unknown_traps.json). Use that file to test refusals.
-4. Wire `search_airport(query)` to that index. Path A: Nova Sonic calls this tool. Path B: your code calls it after Wispr transcribes, before Kokoro speaks. Either way, no factual answer without this tool.
+---
 
-Hindi and Spanish pages translate the English facts. Do not add a gate, time, or phone number that is missing from the English files.
+## 📋 Document Inventory
 
-| File | What it covers |
-|---|---|
-| [`nia_airport/terminals.md`](./nia_airport/terminals.md) | T1 / T2 / T3, airlines, walking times |
-| [`nia_airport/gates.md`](./nia_airport/gates.md) | Gate → terminal, food, last-call (includes **C22**) |
-| [`nia_airport/security.md`](./nia_airport/security.md) | Liquids, laptops, family lane — not visa law |
-| [`nia_airport/transport.md`](./nia_airport/transport.md) | Metro, taxi, car park, hotel shuttle |
-| [`nia_airport/amenities.md`](./nia_airport/amenities.md) | Prayer room, medical, lost & found, wifi |
-| [`nia_airport/hours.md`](./nia_airport/hours.md) | Desk hours, last metro, phones |
-| [`nia_airport/faq.md`](./nia_airport/faq.md) | Short answers meant to be spoken |
-| [`nia_airport/hi/`](./nia_airport/hi/) | Hindi — same facts, not new facts |
-| [`nia_airport/es/`](./nia_airport/es/) | Spanish — same facts, not new facts |
-| [`unknown_traps.json`](./unknown_traps.json) | Questions your avatar must **refuse** |
+All active documents are declaratively registered in [`manifest.json`](./manifest.json):
+
+| Document ID | Source File | Description | Language |
+|---|---|---|---|
+| `terminals` | [`lck_airport/terminals.md`](./lck_airport/terminals.md) | Terminal 1, 2, and 3 layouts, airline allocations, walking times | English (`en`) |
+| `gates` | [`lck_airport/gates.md`](./lck_airport/gates.md) | Gate concourses, boarding procedures, last-call rules | English (`en`) |
+| `security` | [`lck_airport/security.md`](./lck_airport/security.md) | CISF screening rules, allowed liquids, electronics, baggage limits | English (`en`) |
+| `transport` | [`lck_airport/transport.md`](./lck_airport/transport.md) | Lucknow Metro (Red Line), prepaid taxis, parking tariffs, shuttles | English (`en`) |
+| `amenities` | [`lck_airport/amenities.md`](./lck_airport/amenities.md) | Lounges, prayer rooms, medical clinics, lost & found, Wi-Fi | English (`en`) |
+| `hours` | [`lck_airport/hours.md`](./lck_airport/hours.md) | Terminal opening hours, inquiry desk schedules, helpline phones | English (`en`) |
+| `faq` | [`lck_airport/faq.md`](./lck_airport/faq.md) | Concise spoken answers tailored for kiosk voice queries | English (`en`) |
+| `gates-hi` | [`lck_airport/hi/gates.md`](./lck_airport/hi/gates.md) | गेट और बोर्डिंग नियम (Hindi translation of gates) | Hindi (`hi`) |
+| `amenities-hi` | [`lck_airport/hi/amenities.md`](./lck_airport/hi/amenities.md) | प्रार्थना कक्ष, मेडिकल, खोया-पाया (Hindi translation) | Hindi (`hi`) |
+| `faq-hi` | [`lck_airport/hi/faq.md`](./lck_airport/hi/faq.md) | छोटे बोले जाने वाले जवाब (Hindi FAQ) | Hindi (`hi`) |
+| `gates-es` | [`lck_airport/es/gates.md`](./lck_airport/es/gates.md) | Puertas y último aviso (Spanish translation) | Spanish (`es`) |
+| `amenities-es` | [`lck_airport/es/amenities.md`](./lck_airport/es/amenities.md) | Salas, médico, objetos perdidos (Spanish translation) | Spanish (`es`) |
+| `faq-es` | [`lck_airport/es/faq.md`](./lck_airport/es/faq.md) | Respuestas cortas para hablar (Spanish FAQ) | Spanish (`es`) |
+
+---
+
+## 🚫 Excluded Files & Trap Benchmarks
+
+Files registered under `"do_not_ingest"` in `manifest.json`:
+* **[`unknown_traps.json`](./unknown_traps.json)**: Adversarial test suite of unanswerable and out-of-scope questions (fake flight statuses, legal advice, out-of-bounds gates) used to verify that the LLM abstains rather than hallucinating.
+* **`README.md`**: Corpus documentation.
+* **`manifest.json`**: Structural inventory file.
+
+---
+
+## ⚙️ How the Pipeline Consumes This Data
+
+1. **Atomic Snapshot Activation**: On application startup or when calling `POST /api/v1/knowledge/refresh`, the backend validates paths against directory traversal attacks, compiles documents into memory, and tags the snapshot with an immutable version ID.
+2. **OKF Processing**: Compiles all approved documents into a continuous Markdown context injected directly into the LLM system prompt.
+3. **RAG Processing**: Splits documents into table-aware semantic chunks and indexes them into an in-memory **BM25 Lexical Index** with Reciprocal Rank Fusion (RRF).

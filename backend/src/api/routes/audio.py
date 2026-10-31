@@ -1,6 +1,6 @@
 import base64
 from fastapi import APIRouter, UploadFile, File
-from lck_backend.schemas.audio import TranscriptionResponse, SynthesisRequest, SynthesisResponse, VisemeCue
+from schemas.audio import TranscriptionResponse, SynthesisRequest, SynthesisResponse, VisemeCue
 
 router = APIRouter(prefix="/audio", tags=["Audio (STT/TTS)"])
 

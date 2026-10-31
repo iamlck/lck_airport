@@ -1,7 +1,7 @@
 import httpx
 from fastapi import APIRouter
-from lck_backend.schemas.health import HealthResponse, ServiceStatus
-from lck_backend.core.config import settings
+from schemas.health import HealthResponse, ServiceStatus
+from core.config import settings
 
 router = APIRouter()
 

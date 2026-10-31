@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
-from lck_backend.schemas.knowledge import SnapshotStatusResponse, RefreshResponse
-from lck_backend.knowledge.snapshot import snapshot_manager
-from lck_backend.api.dependencies import verify_admin_token
+from schemas.knowledge import SnapshotStatusResponse, RefreshResponse
+from knowledge.snapshot import snapshot_manager
+from api.dependencies import verify_admin_token
 
 router = APIRouter(prefix="/knowledge", tags=["Knowledge"])
 

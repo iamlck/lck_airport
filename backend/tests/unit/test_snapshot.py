@@ -4,7 +4,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from lck_backend.knowledge.snapshot import strip_frontmatter, SnapshotManager
+from knowledge.snapshot import strip_frontmatter, SnapshotManager
 
 
 GATES_MD = """---
@@ -67,7 +67,7 @@ class TestSnapshot(unittest.TestCase):
         self.manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
 
         patcher = patch.multiple(
-            "lck_backend.knowledge.snapshot.settings",
+            "knowledge.snapshot.settings",
             data_dir=str(self.data_dir),
             manifest_path=str(self.manifest_path),
             cache_knowledge_context=True,

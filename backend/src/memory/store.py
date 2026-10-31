@@ -2,10 +2,10 @@ import uuid
 from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy import select, update
-from lck_backend.core.config import settings
-from lck_backend.core.logging import logger
-from lck_backend.memory.models import Base, SessionModel, MessageModel
-from lck_backend.llm.client import LLMClient
+from core.config import settings
+from core.logging import logger
+from memory.models import Base, SessionModel, MessageModel
+from llm.client import LLMClient
 
 
 class MemoryStore:
